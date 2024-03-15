@@ -1,0 +1,14 @@
+# file options
+
+# format options
+
+--commas always
+--indent tab
+--indentcase true
+--swiftversion 5.9
+--trimwhitespace always
+--ifdef no-indent
+
+# rules
+
+--disable preferForLoop
