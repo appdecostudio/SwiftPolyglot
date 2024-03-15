@@ -24,7 +24,11 @@ func checkTranslations(in fileURL: URL, for languages: [String]) {
 	}
 
 	for (originalString, translations) in strings {
-		guard let localizations = translations["localizations"] as? [String: [String: Any]] else { continue }
+		guard let localizations = translations["localizations"] as? [String: [String: Any]] else {
+			print("Warning: '\(originalString)' is not translated in any language in file: \(fileURL.absoluteString)")
+			missingTranslations = true
+			continue
+		}
 
 		for lang in languages {
 			if let langDict = localizations[lang],
