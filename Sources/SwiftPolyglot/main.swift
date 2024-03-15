@@ -5,6 +5,7 @@ guard CommandLine.arguments.count > 1 else {
 	exit(1)
 }
 
+let isRunningFromGitHubActions = ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] == "true"
 let languages = CommandLine.arguments[1].split(separator: ",").map(String.init)
 let errorOnMissing = CommandLine.arguments.contains("--errorOnMissing")
 
@@ -19,7 +20,11 @@ func checkTranslations(in fileURL: URL, for languages: [String]) {
 	      let jsonDict = jsonObject as? [String: Any],
 	      let strings = jsonDict["strings"] as? [String: [String: Any]]
 	else {
-		print("::warning file=\(fileURL.path)::Could not process file at path: \(fileURL.path)")
+		if isRunningFromGitHubActions {
+			print("::warning file=\(fileURL.path)::Could not process file at path: \(fileURL.path)")
+		} else {
+			print("Could not process file at path: \(fileURL.path)")
+		}
 		return
 	}
 
@@ -55,10 +60,14 @@ func searchDirectory(_ dirPath: String) {
 }
 
 func logWarning(file: String, message: String) {
-	if errorOnMissing {
-		print("::error file=\(file)::\(message)")
+	if isRunningFromGitHubActions {
+		if errorOnMissing {
+			print("::error file=\(file)::\(message)")
+		} else {
+			print("::warning file=\(file)::\(message)")
+		}
 	} else {
-		print("::warning file=\(file)::\(message)")
+		print(message)
 	}
 }
 
