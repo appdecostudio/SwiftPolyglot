@@ -1,5 +1,4 @@
-
-## What is SwiftPolyglot?
+## What is SwiftPolyglot?
 
 SwiftPolyglot is a handy script that checks that all of your `.xcstrings` include translations for the languages you specify. If you're working on an app that supports more than one language, there's a good chance you might forget to translate new strings.
 
@@ -28,7 +27,7 @@ $ swift build -c release
 ```
 $ cd ../path/to/your/project
 $ swift run --package-path ../path/to/SwiftPolyglot swiftpolyglot "en,es,de"
-``` 
+```
 
 ## Arguments
 
@@ -63,3 +62,4 @@ jobs:
           swift build --package-path ./SwiftPolyglot --configuration release
           swift run --package-path ./SwiftPolyglot swiftpolyglot "es,fr,de,it" --errorOnMissing
 ```
+
