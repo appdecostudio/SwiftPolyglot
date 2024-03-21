@@ -9,6 +9,10 @@ let package = Package(
 		.executable(name: "swiftpolyglot", targets: ["SwiftPolyglot"]),
 	],
 	targets: [
-		.executableTarget(name: "SwiftPolyglot"),
+		.executableTarget(
+			name: "SwiftPolyglot",
+			dependencies: ["SwiftPolyglotCore"]
+		),
+		.target(name: "SwiftPolyglotCore")
 	]
 )
