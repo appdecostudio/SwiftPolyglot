@@ -8,14 +8,14 @@ public struct SwiftPolyglot {
     }
 
     public func run() throws {
-        guard CommandLine.arguments.count > 1 else {
+        guard !arguments.isEmpty else {
             print("Usage: script.swift <language codes> [--errorOnMissing]")
             exit(1)
         }
 
         let isRunningFromGitHubActions = ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] == "true"
-        let languages = CommandLine.arguments[1].split(separator: ",").map(String.init)
-        let errorOnMissing = CommandLine.arguments.contains("--errorOnMissing")
+        let languages = arguments[0].split(separator: ",").map(String.init)
+        let errorOnMissing = arguments.contains("--errorOnMissing")
 
         let fileManager = FileManager.default
         let currentDirectoryPath = fileManager.currentDirectoryPath
