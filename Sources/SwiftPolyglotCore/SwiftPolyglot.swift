@@ -2,9 +2,11 @@ import Foundation
 
 public struct SwiftPolyglot {
     private let arguments: [String]
+    private let filePaths: [String]
 
-    public init(arguments: [String]) {
+    public init(arguments: [String], filePaths: [String]) {
         self.arguments = arguments
+        self.filePaths = filePaths
     }
 
     public func run() throws {
@@ -16,9 +18,6 @@ public struct SwiftPolyglot {
         let isRunningFromGitHubActions = ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] == "true"
         let languages = arguments[0].split(separator: ",").map(String.init)
         let errorOnMissing = arguments.contains("--errorOnMissing")
-
-        let fileManager = FileManager.default
-        let currentDirectoryPath = fileManager.currentDirectoryPath
 
         var missingTranslations = false
 
@@ -56,13 +55,11 @@ public struct SwiftPolyglot {
             }
         }
 
-        func searchDirectory(_ dirPath: String) {
-            if let enumerator = fileManager.enumerator(atPath: dirPath) {
-                for case let file as String in enumerator {
-                    if file.hasSuffix(".xcstrings") {
-                        let fileURL = URL(fileURLWithPath: dirPath).appendingPathComponent(file)
-                        checkTranslations(in: fileURL, for: languages)
-                    }
+        func searchDirectory() {
+            for filePath in filePaths {
+                if filePath.hasSuffix(".xcstrings") {
+                    let fileURL = URL(fileURLWithPath: filePath)
+                    checkTranslations(in: fileURL, for: languages)
                 }
             }
         }
@@ -79,7 +76,7 @@ public struct SwiftPolyglot {
             }
         }
 
-        searchDirectory(currentDirectoryPath)
+        searchDirectory()
 
         if missingTranslations, errorOnMissing {
             print("Error: One or more translations are missing.")
