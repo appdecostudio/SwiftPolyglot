@@ -13,6 +13,13 @@ let package = Package(
 			name: "SwiftPolyglot",
 			dependencies: ["SwiftPolyglotCore"]
 		),
-		.target(name: "SwiftPolyglotCore")
+		.target(name: "SwiftPolyglotCore"),
+		.testTarget(
+			name: "SwiftPolyglotCoreTests",
+			dependencies: ["SwiftPolyglotCore"],
+			resources: [
+				.copy("TestFiles")
+			]
+		)
 	]
 )
