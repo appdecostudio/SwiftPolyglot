@@ -11,8 +11,7 @@ public struct SwiftPolyglot {
 
     public func run() throws {
         guard !arguments.isEmpty else {
-            print("Usage: script.swift <language codes> [--errorOnMissing]")
-            exit(1)
+            throw SwiftPolyglotError.noLanguageCodes
         }
 
         let isRunningFromGitHubActions = ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] == "true"
@@ -79,8 +78,7 @@ public struct SwiftPolyglot {
         searchDirectory()
 
         if missingTranslations, errorOnMissing {
-            print("Error: One or more translations are missing.")
-            exit(1)
+            throw SwiftPolyglotError.missingTranslations
         } else if missingTranslations {
             print("Completed with missing translations.")
         } else {
