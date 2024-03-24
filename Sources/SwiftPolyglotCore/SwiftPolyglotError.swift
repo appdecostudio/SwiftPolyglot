@@ -11,7 +11,7 @@ extension SwiftPolyglotError: LocalizedError {
         case .missingTranslations:
             "Error: One or more translations are missing."
         case .noLanguageCodes:
-            "Usage: script.swift <language codes> [--errorOnMissing]"
+            "Usage: swiftpolyglot <comma-separated language codes> [--errorOnMissing]"
         }
     }
 }
