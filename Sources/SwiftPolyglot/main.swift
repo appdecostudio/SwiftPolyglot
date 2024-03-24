@@ -16,5 +16,6 @@ let swiftPolyglot: SwiftPolyglot = .init(
 do {
     try swiftPolyglot.run()
 } catch {
-    print(error)
+    print(error.localizedDescription)
+    exit(EXIT_FAILURE)
 }
