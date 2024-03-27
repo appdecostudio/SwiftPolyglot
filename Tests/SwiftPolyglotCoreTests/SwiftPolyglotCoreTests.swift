@@ -22,6 +22,26 @@ final class SwiftPolyglotCoreTests: XCTestCase {
         XCTAssertNoThrow(try swiftPolyglot.run())
     }
 
+    func testStringCatalogVariationsFullyTranslated() throws {
+        guard
+            let stringCatalogFilePath = Bundle.module.path(
+                forResource: "VariationsFullyTranslated",
+                ofType: ".xcstrings",
+                inDirectory: "TestFiles"
+            )
+        else {
+            XCTFail("Variations fully translated string catalog for testing not found")
+            return
+        }
+
+        let swiftPolyglot: SwiftPolyglot = .init(
+            arguments: ["ca,de,en,es"],
+            filePaths: [stringCatalogFilePath]
+        )
+
+        XCTAssertNoThrow(try swiftPolyglot.run())
+    }
+
     func testStringCatalogWithMissingTranslations() throws {
         guard
             let stringCatalogFilePath = Bundle.module.path(
@@ -41,5 +61,24 @@ final class SwiftPolyglotCoreTests: XCTestCase {
 
         XCTAssertThrowsError(try swiftPolyglot.run())
     }
-}
 
+    func testStringCatalogWithMissingVariations() throws {
+        guard
+            let stringCatalogFilePath = Bundle.module.path(
+                forResource: "VariationsWithMissingTranslations",
+                ofType: ".xcstrings",
+                inDirectory: "TestFiles"
+            )
+        else {
+            XCTFail("String catalog with missing variations translations for testing not found")
+            return
+        }
+
+        let swiftPolyglot: SwiftPolyglot = .init(
+            arguments: ["de,en", "--errorOnMissing"],
+            filePaths: [stringCatalogFilePath]
+        )
+
+        XCTAssertThrowsError(try swiftPolyglot.run())
+    }
+}

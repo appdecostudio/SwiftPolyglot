@@ -3,7 +3,7 @@
 # format options
 
 --commas always
---indent tab
+--indent 4
 --indentcase true
 --swiftversion 5.9
 --trimwhitespace always

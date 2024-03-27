@@ -1,25 +1,25 @@
-// swift-tools-version: 5.4
+// swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
-	name: "SwiftPolyglot",
-	products: [
-		.executable(name: "swiftpolyglot", targets: ["SwiftPolyglot"]),
-	],
-	targets: [
-		.executableTarget(
-			name: "SwiftPolyglot",
-			dependencies: ["SwiftPolyglotCore"]
-		),
-		.target(name: "SwiftPolyglotCore"),
-		.testTarget(
-			name: "SwiftPolyglotCoreTests",
-			dependencies: ["SwiftPolyglotCore"],
-			resources: [
-				.copy("TestFiles")
-			]
-		)
-	]
+    name: "SwiftPolyglot",
+    products: [
+        .executable(name: "swiftpolyglot", targets: ["SwiftPolyglot"]),
+    ],
+    targets: [
+        .executableTarget(
+            name: "SwiftPolyglot",
+            dependencies: ["SwiftPolyglotCore"]
+        ),
+        .target(name: "SwiftPolyglotCore"),
+        .testTarget(
+            name: "SwiftPolyglotCoreTests",
+            dependencies: ["SwiftPolyglotCore"],
+            resources: [
+                .copy("TestFiles"),
+            ]
+        ),
+    ]
 )
