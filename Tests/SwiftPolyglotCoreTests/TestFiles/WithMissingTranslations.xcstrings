@@ -17,6 +17,17 @@
           }
         }
       }
+    },
+    "football" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "football"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

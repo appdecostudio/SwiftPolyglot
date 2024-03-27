@@ -20,7 +20,7 @@ public struct SwiftPolyglot {
 
         var missingTranslations = false
 
-        func checkTranslations(in fileURL: URL, for languages: [String]) {
+        func checkTranslations(in fileURL: URL, for languages: [String]) throws {
             guard let data = try? Data(contentsOf: fileURL),
                   let jsonObject = try? JSONSerialization.jsonObject(with: data),
                   let jsonDict = jsonObject as? [String: Any],
@@ -42,23 +42,65 @@ public struct SwiftPolyglot {
                 }
 
                 for lang in languages {
-                    if let langDict = localizations[lang],
-                       let stringUnit = langDict["stringUnit"] as? [String: Any],
-                       let state = stringUnit["state"] as? String, state == "translated"
+                    guard let languageDict = localizations[lang] else {
+                        logWarning(file: fileURL.path, message: "'\(originalString)' is missing translations for language: \(lang) in file: \(fileURL.path)")
+                        missingTranslations = true
+                        continue
+                    }
+
+                    if let variations = languageDict["variations"] as? [String: [String: [String: Any]]] {
+                        try checkVariations(variations: variations, originalString: originalString, lang: lang, fileURL: fileURL)
+                    } else if let stringUnit = languageDict["stringUnit"] as? [String: Any],
+                              let state = stringUnit["state"] as? String, state != "translated"
                     {
-                    } else {
-                        logWarning(file: fileURL.path, message: "'\(originalString)' is missing or not translated in \(lang) in file: \(fileURL.path)")
+                        logWarning(file: fileURL.path, message: "'\(originalString)' is missing or not translated in \(lang).")
                         missingTranslations = true
                     }
                 }
             }
         }
 
-        func searchDirectory() {
+        func checkVariations(variations: [String: [String: [String: Any]]], originalString: String, lang: String, fileURL: URL) throws {
+            for (variationKey, variationDict) in variations {
+                if variationKey == "plural" {
+                    checkPluralizations(pluralizations: variationDict, originalString: originalString, lang: lang, fileURL: fileURL)
+                } else if variationKey == "device" {
+                    checkDeviceVariations(devices: variationDict, originalString: originalString, lang: lang, fileURL: fileURL)
+                } else {
+                    throw SwiftPolyglotError.unsupportedVariation(variation: variationKey)
+                }
+            }
+        }
+
+        func checkPluralizations(pluralizations: [String: [String: Any]], originalString: String, lang: String, fileURL: URL) {
+            for (pluralForm, value) in pluralizations {
+                guard let stringUnit = value["stringUnit"] as? [String: Any],
+                      let state = stringUnit["state"] as? String, state == "translated"
+                else {
+                    logWarning(file: fileURL.path, message: "'\(originalString)' plural form '\(pluralForm)' is missing or not translated in \(lang) in file: \(fileURL.path)")
+                    missingTranslations = true
+                    continue
+                }
+            }
+        }
+
+        func checkDeviceVariations(devices: [String: [String: Any]], originalString: String, lang: String, fileURL: URL) {
+            for (device, value) in devices {
+                guard let stringUnit = value["stringUnit"] as? [String: Any],
+                      let state = stringUnit["state"] as? String, state == "translated"
+                else {
+                    logWarning(file: fileURL.path, message: "'\(originalString)' device '\(device)' is missing or not translated in \(lang) in file: \(fileURL.path)")
+                    missingTranslations = true
+                    continue
+                }
+            }
+        }
+
+        func searchDirectory() throws {
             for filePath in filePaths {
                 if filePath.hasSuffix(".xcstrings") {
                     let fileURL = URL(fileURLWithPath: filePath)
-                    checkTranslations(in: fileURL, for: languages)
+                    try checkTranslations(in: fileURL, for: languages)
                 }
             }
         }
@@ -75,7 +117,7 @@ public struct SwiftPolyglot {
             }
         }
 
-        searchDirectory()
+        try searchDirectory()
 
         if missingTranslations, errorOnMissing {
             throw SwiftPolyglotError.missingTranslations
