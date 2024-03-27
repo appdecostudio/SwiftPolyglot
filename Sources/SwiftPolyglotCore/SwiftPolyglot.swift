@@ -53,7 +53,7 @@ public struct SwiftPolyglot {
                     } else if let stringUnit = languageDict["stringUnit"] as? [String: Any],
                               let state = stringUnit["state"] as? String, state != "translated"
                     {
-                        logWarning(file: fileURL.path, message: "'\(originalString)' is missing or not translated in \(lang).")
+                        logWarning(file: fileURL.path, message: "'\(originalString)' is missing or not translated in \(lang) in file: \(fileURL.path)")
                         missingTranslations = true
                     }
                 }
