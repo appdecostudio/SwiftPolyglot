@@ -10,11 +10,11 @@ extension SwiftPolyglotError: LocalizedError {
     public var errorDescription: String? {
         switch self {
             case .missingTranslations:
-                "Error: One or more translations are missing."
+                return "Error: One or more translations are missing."
             case .noLanguageCodes:
-                "Usage: swiftpolyglot <comma-separated language codes> [--errorOnMissing]"
+                return "Usage: swiftpolyglot <comma-separated language codes> [--errorOnMissing]"
             case let .unsupportedVariation(variation):
-                "Variation type '\(variation)' is not supported. Please create an issue in GitHub"
+                return "Variation type '\(variation)' is not supported. Please create an issue in GitHub"
         }
     }
 }
