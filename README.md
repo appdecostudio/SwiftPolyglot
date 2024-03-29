@@ -55,11 +55,11 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Clone SwiftPolyglot
-        run: git clone https://github.com/appdecostudio/SwiftPolyglot.git
+        run: git clone https://github.com/appdecostudio/SwiftPolyglot.git --branch=0.3.1 ../SwiftPolyglot
 
       - name: validate translations
         run: |
-          swift build --package-path ./SwiftPolyglot --configuration release
-          swift run --package-path ./SwiftPolyglot swiftpolyglot "es,fr,de,it" --errorOnMissing
+          swift build --package-path ../SwiftPolyglot --configuration release
+          swift run --package-path ../SwiftPolyglot swiftpolyglot "es,fr,de,it" --errorOnMissing
 ```
 
