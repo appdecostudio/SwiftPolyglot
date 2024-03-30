@@ -1,30 +1,37 @@
 import Foundation
 
 public struct SwiftPolyglot {
+    private static let errorOnMissingArgument = "--errorOnMissing"
+
     private let arguments: [String]
     private let filePaths: [String]
+    private let languageCodes: [String]
     private let runningOnAGitHubAction: Bool
 
     private var logErrorOnMissing: Bool {
-        arguments.contains("--errorOnMissing")
+        arguments.contains(Self.errorOnMissingArgument)
     }
 
-    public init(arguments: [String], filePaths: [String], runningOnAGitHubAction: Bool) {
+    public init(arguments: [String], filePaths: [String], runningOnAGitHubAction: Bool) throws {
+        let languageCodes = arguments[0].split(separator: ",").map(String.init)
+
+        guard
+            !languageCodes.contains(Self.errorOnMissingArgument),
+            !languageCodes.isEmpty
+        else {
+            throw SwiftPolyglotError.noLanguageCodes
+        }
+
         self.arguments = arguments
         self.filePaths = filePaths
+        self.languageCodes = languageCodes
         self.runningOnAGitHubAction = runningOnAGitHubAction
     }
 
     public func run() throws {
-        guard !arguments.isEmpty else {
-            throw SwiftPolyglotError.noLanguageCodes
-        }
-
-        let languages = arguments[0].split(separator: ",").map(String.init)
-
         var missingTranslations = false
 
-        try searchDirectory(for: languages, missingTranslations: &missingTranslations)
+        try searchDirectory(for: languageCodes, missingTranslations: &missingTranslations)
 
         if missingTranslations, logErrorOnMissing {
             throw SwiftPolyglotError.missingTranslations
