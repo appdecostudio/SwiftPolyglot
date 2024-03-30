@@ -4,6 +4,10 @@ public struct SwiftPolyglot {
     private let arguments: [String]
     private let filePaths: [String]
 
+    private var logErrorOnMissing: Bool {
+        arguments.contains("--errorOnMissing")
+    }
+
     public init(arguments: [String], filePaths: [String]) {
         self.arguments = arguments
         self.filePaths = filePaths
@@ -16,7 +20,6 @@ public struct SwiftPolyglot {
 
         let isRunningFromGitHubActions = ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] == "true"
         let languages = arguments[0].split(separator: ",").map(String.init)
-        let errorOnMissing = arguments.contains("--errorOnMissing")
 
         var missingTranslations = false
 
@@ -107,7 +110,7 @@ public struct SwiftPolyglot {
 
         func logWarning(file: String, message: String) {
             if isRunningFromGitHubActions {
-                if errorOnMissing {
+                if logErrorOnMissing {
                     print("::error file=\(file)::\(message)")
                 } else {
                     print("::warning file=\(file)::\(message)")
@@ -119,7 +122,7 @@ public struct SwiftPolyglot {
 
         try searchDirectory()
 
-        if missingTranslations, errorOnMissing {
+        if missingTranslations, logErrorOnMissing {
             throw SwiftPolyglotError.missingTranslations
         } else if missingTranslations {
             print("Completed with missing translations.")
