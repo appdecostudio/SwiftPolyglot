@@ -35,24 +35,42 @@ public struct SwiftPolyglot {
         }
     }
 
-    private func checkDeviceVariations(devices: [String: [String: Any]], originalString: String, lang: String, fileURL: URL, missingTranslations: inout Bool) {
+    private func checkDeviceVariations(
+        devices: [String: [String: Any]],
+        originalString: String,
+        lang: String,
+        fileURL: URL,
+        missingTranslations: inout Bool
+    ) {
         for (device, value) in devices {
             guard let stringUnit = value["stringUnit"] as? [String: Any],
                   let state = stringUnit["state"] as? String, state == "translated"
             else {
-                logWarning(file: fileURL.path, message: "'\(originalString)' device '\(device)' is missing or not translated in \(lang) in file: \(fileURL.path)")
+                logWarning(
+                    file: fileURL.path,
+                    message: "'\(originalString)' device '\(device)' is missing or not translated in \(lang) in file: \(fileURL.path)"
+                )
                 missingTranslations = true
                 continue
             }
         }
     }
 
-    private func checkPluralizations(pluralizations: [String: [String: Any]], originalString: String, lang: String, fileURL: URL, missingTranslations: inout Bool) {
+    private func checkPluralizations(
+        pluralizations: [String: [String: Any]],
+        originalString: String,
+        lang: String,
+        fileURL: URL,
+        missingTranslations: inout Bool
+    ) {
         for (pluralForm, value) in pluralizations {
             guard let stringUnit = value["stringUnit"] as? [String: Any],
                   let state = stringUnit["state"] as? String, state == "translated"
             else {
-                logWarning(file: fileURL.path, message: "'\(originalString)' plural form '\(pluralForm)' is missing or not translated in \(lang) in file: \(fileURL.path)")
+                logWarning(
+                    file: fileURL.path,
+                    message: "'\(originalString)' plural form '\(pluralForm)' is missing or not translated in \(lang) in file: \(fileURL.path)"
+                )
                 missingTranslations = true
                 continue
             }
@@ -75,36 +93,69 @@ public struct SwiftPolyglot {
 
         for (originalString, translations) in strings {
             guard let localizations = translations["localizations"] as? [String: [String: Any]] else {
-                logWarning(file: fileURL.path, message: "'\(originalString)' is not translated in any language in file: \(fileURL.path)")
+                logWarning(
+                    file: fileURL.path,
+                    message: "'\(originalString)' is not translated in any language in file: \(fileURL.path)"
+                )
                 missingTranslations = true
                 continue
             }
 
             for lang in languages {
                 guard let languageDict = localizations[lang] else {
-                    logWarning(file: fileURL.path, message: "'\(originalString)' is missing translations for language: \(lang) in file: \(fileURL.path)")
+                    logWarning(
+                        file: fileURL.path,
+                        message: "'\(originalString)' is missing translations for language: \(lang) in file: \(fileURL.path)"
+                    )
                     missingTranslations = true
                     continue
                 }
 
                 if let variations = languageDict["variations"] as? [String: [String: [String: Any]]] {
-                    try checkVariations(variations: variations, originalString: originalString, lang: lang, fileURL: fileURL, missingTranslations: &missingTranslations)
+                    try checkVariations(
+                        variations: variations,
+                        originalString: originalString,
+                        lang: lang,
+                        fileURL: fileURL,
+                        missingTranslations: &missingTranslations
+                    )
                 } else if let stringUnit = languageDict["stringUnit"] as? [String: Any],
                           let state = stringUnit["state"] as? String, state != "translated"
                 {
-                    logWarning(file: fileURL.path, message: "'\(originalString)' is missing or not translated in \(lang) in file: \(fileURL.path)")
+                    logWarning(
+                        file: fileURL.path,
+                        message: "'\(originalString)' is missing or not translated in \(lang) in file: \(fileURL.path)"
+                    )
                     missingTranslations = true
                 }
             }
         }
     }
 
-    private func checkVariations(variations: [String: [String: [String: Any]]], originalString: String, lang: String, fileURL: URL, missingTranslations: inout Bool) throws {
+    private func checkVariations(
+        variations: [String: [String: [String: Any]]],
+        originalString: String,
+        lang: String,
+        fileURL: URL,
+        missingTranslations: inout Bool
+    ) throws {
         for (variationKey, variationDict) in variations {
             if variationKey == "plural" {
-                checkPluralizations(pluralizations: variationDict, originalString: originalString, lang: lang, fileURL: fileURL, missingTranslations: &missingTranslations)
+                checkPluralizations(
+                    pluralizations: variationDict,
+                    originalString: originalString,
+                    lang: lang,
+                    fileURL: fileURL,
+                    missingTranslations: &missingTranslations
+                )
             } else if variationKey == "device" {
-                checkDeviceVariations(devices: variationDict, originalString: originalString, lang: lang, fileURL: fileURL, missingTranslations: &missingTranslations)
+                checkDeviceVariations(
+                    devices: variationDict,
+                    originalString: originalString,
+                    lang: lang,
+                    fileURL: fileURL,
+                    missingTranslations: &missingTranslations
+                )
             } else {
                 throw SwiftPolyglotError.unsupportedVariation(variation: variationKey)
             }
