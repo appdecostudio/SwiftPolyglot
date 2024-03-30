@@ -10,7 +10,8 @@ else {
 
 let swiftPolyglot: SwiftPolyglot = .init(
     arguments: Array(CommandLine.arguments.dropFirst()),
-    filePaths: filePaths
+    filePaths: filePaths,
+    runningOnAGitHubAction: ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] == "true"
 )
 
 do {
