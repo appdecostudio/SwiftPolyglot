@@ -8,12 +8,13 @@ else {
     exit(EXIT_FAILURE)
 }
 
-let swiftPolyglot: SwiftPolyglot = .init(
-    arguments: Array(CommandLine.arguments.dropFirst()),
-    filePaths: filePaths
-)
-
 do {
+    let swiftPolyglot: SwiftPolyglot = try .init(
+        arguments: Array(CommandLine.arguments.dropFirst()),
+        filePaths: filePaths,
+        runningOnAGitHubAction: ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] == "true"
+    )
+
     try swiftPolyglot.run()
 } catch {
     print(error.localizedDescription)

@@ -14,9 +14,10 @@ final class SwiftPolyglotCoreTests: XCTestCase {
             return
         }
 
-        let swiftPolyglot: SwiftPolyglot = .init(
+        let swiftPolyglot: SwiftPolyglot = try .init(
             arguments: ["ca,de,en,es"],
-            filePaths: [stringCatalogFilePath]
+            filePaths: [stringCatalogFilePath],
+            runningOnAGitHubAction: false
         )
 
         XCTAssertNoThrow(try swiftPolyglot.run())
@@ -34,9 +35,10 @@ final class SwiftPolyglotCoreTests: XCTestCase {
             return
         }
 
-        let swiftPolyglot: SwiftPolyglot = .init(
+        let swiftPolyglot: SwiftPolyglot = try .init(
             arguments: ["ca,de,en,es"],
-            filePaths: [stringCatalogFilePath]
+            filePaths: [stringCatalogFilePath],
+            runningOnAGitHubAction: false
         )
 
         XCTAssertNoThrow(try swiftPolyglot.run())
@@ -54,9 +56,10 @@ final class SwiftPolyglotCoreTests: XCTestCase {
             return
         }
 
-        let swiftPolyglot: SwiftPolyglot = .init(
+        let swiftPolyglot: SwiftPolyglot = try .init(
             arguments: ["ca,de,en,es", "--errorOnMissing"],
-            filePaths: [stringCatalogFilePath]
+            filePaths: [stringCatalogFilePath],
+            runningOnAGitHubAction: false
         )
 
         XCTAssertThrowsError(try swiftPolyglot.run())
@@ -74,9 +77,10 @@ final class SwiftPolyglotCoreTests: XCTestCase {
             return
         }
 
-        let swiftPolyglot: SwiftPolyglot = .init(
+        let swiftPolyglot: SwiftPolyglot = try .init(
             arguments: ["de,en", "--errorOnMissing"],
-            filePaths: [stringCatalogFilePath]
+            filePaths: [stringCatalogFilePath],
+            runningOnAGitHubAction: false
         )
 
         XCTAssertThrowsError(try swiftPolyglot.run())
