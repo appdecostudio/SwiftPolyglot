@@ -4,13 +4,18 @@ public struct SwiftPolyglotCore {
     private let filePaths: [String]
     private let languageCodes: [String]
     private let logsErrorOnMissingTranslation: Bool
-    private let runningOnAGitHubAction: Bool
+    private let isRunningInAGitHubAction: Bool
 
-    public init(filePaths: [String], languageCodes: [String], logsErrorOnMissingTranslation: Bool, runningOnAGitHubAction: Bool) {
+    public init(
+        filePaths: [String],
+        languageCodes: [String],
+        logsErrorOnMissingTranslation: Bool,
+        isRunningInAGitHubAction: Bool
+    ) {
         self.filePaths = filePaths
         self.languageCodes = languageCodes
         self.logsErrorOnMissingTranslation = logsErrorOnMissingTranslation
-        self.runningOnAGitHubAction = runningOnAGitHubAction
+        self.isRunningInAGitHubAction = isRunningInAGitHubAction
     }
 
     public func run() throws {
@@ -75,7 +80,7 @@ public struct SwiftPolyglotCore {
               let jsonDict = jsonObject as? [String: Any],
               let strings = jsonDict["strings"] as? [String: [String: Any]]
         else {
-            if runningOnAGitHubAction {
+            if isRunningInAGitHubAction {
                 print("::warning file=\(fileURL.path)::Could not process file at path: \(fileURL.path)")
             } else {
                 print("Could not process file at path: \(fileURL.path)")
@@ -155,7 +160,7 @@ public struct SwiftPolyglotCore {
     }
     
     private func logWarning(file: String, message: String) {
-        if runningOnAGitHubAction {
+        if isRunningInAGitHubAction {
             if logsErrorOnMissingTranslation {
                 print("::error file=\(file)::\(message)")
             } else {

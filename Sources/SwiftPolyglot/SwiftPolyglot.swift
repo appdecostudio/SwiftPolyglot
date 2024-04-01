@@ -22,7 +22,7 @@ struct SwiftPolyglot: ParsableCommand {
             filePaths: filePaths,
             languageCodes: languages,
             logsErrorOnMissingTranslation: errorOnMissing,
-            runningOnAGitHubAction: ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] == "true"
+            isRunningInAGitHubAction: ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] == "true"
         )
 
         do {

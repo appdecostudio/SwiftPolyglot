@@ -18,7 +18,7 @@ final class SwiftPolyglotCoreTests: XCTestCase {
             filePaths: [stringCatalogFilePath],
             languageCodes: ["ca", "de", "en", "es"],
             logsErrorOnMissingTranslation: false,
-            runningOnAGitHubAction: false
+            isRunningInAGitHubAction: false
         )
 
         XCTAssertNoThrow(try swiftPolyglotCore.run())
@@ -40,7 +40,7 @@ final class SwiftPolyglotCoreTests: XCTestCase {
             filePaths: [stringCatalogFilePath],
             languageCodes: ["ca", "de", "en", "es"],
             logsErrorOnMissingTranslation: false,
-            runningOnAGitHubAction: false
+            isRunningInAGitHubAction: false
         )
 
         XCTAssertNoThrow(try swiftPolyglotCore.run())
@@ -62,7 +62,7 @@ final class SwiftPolyglotCoreTests: XCTestCase {
             filePaths: [stringCatalogFilePath],
             languageCodes: ["ca", "de", "en", "es"],
             logsErrorOnMissingTranslation: true,
-            runningOnAGitHubAction: false
+            isRunningInAGitHubAction: false
         )
 
         XCTAssertThrowsError(try swiftPolyglotCore.run())
@@ -84,7 +84,7 @@ final class SwiftPolyglotCoreTests: XCTestCase {
             filePaths: [stringCatalogFilePath],
             languageCodes: ["de, en"],
             logsErrorOnMissingTranslation: true,
-            runningOnAGitHubAction: false
+            isRunningInAGitHubAction: false
         )
 
         XCTAssertThrowsError(try swiftPolyglotCore.run())
