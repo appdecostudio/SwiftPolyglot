@@ -4,6 +4,12 @@ import SwiftPolyglotCore
 
 @main
 struct SwiftPolyglot: ParsableCommand {
+    @Flag(help: "Log errors instead of warnings for missing translations.")
+    private var errorOnMissing = false
+
+    @Argument(help: "Specify the language(s) to be checked.")
+    private var languages: [String]
+
     func run() throws {
         guard
             let enumerator = FileManager.default.enumerator(atPath: FileManager.default.currentDirectoryPath),
@@ -12,13 +18,14 @@ struct SwiftPolyglot: ParsableCommand {
             throw RuntimeError.fileListingNotPossible
         }
 
-        do {
-            let swiftPolyglotCore: SwiftPolyglotCore = try .init(
-                arguments: Array(CommandLine.arguments.dropFirst()),
-                filePaths: filePaths,
-                runningOnAGitHubAction: ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] == "true"
-            )
+        let swiftPolyglotCore: SwiftPolyglotCore = .init(
+            filePaths: filePaths,
+            languageCodes: languages,
+            logsErrorOnMissingTranslation: errorOnMissing,
+            runningOnAGitHubAction: ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] == "true"
+        )
 
+        do {
             try swiftPolyglotCore.run()
         } catch {
             throw RuntimeError.coreError(description: error.localizedDescription)

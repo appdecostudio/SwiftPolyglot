@@ -1,30 +1,15 @@
 import Foundation
 
 public struct SwiftPolyglotCore {
-    private static let errorOnMissingArgument = "--errorOnMissing"
-
-    private let arguments: [String]
     private let filePaths: [String]
     private let languageCodes: [String]
+    private let logsErrorOnMissingTranslation: Bool
     private let runningOnAGitHubAction: Bool
 
-    private var logErrorOnMissing: Bool {
-        arguments.contains(Self.errorOnMissingArgument)
-    }
-
-    public init(arguments: [String], filePaths: [String], runningOnAGitHubAction: Bool) throws {
-        let languageCodes = arguments[0].split(separator: ",").map(String.init)
-
-        guard
-            !languageCodes.contains(Self.errorOnMissingArgument),
-            !languageCodes.isEmpty
-        else {
-            throw SwiftPolyglotError.noLanguageCodes
-        }
-
-        self.arguments = arguments
+    public init(filePaths: [String], languageCodes: [String], logsErrorOnMissingTranslation: Bool, runningOnAGitHubAction: Bool) {
         self.filePaths = filePaths
         self.languageCodes = languageCodes
+        self.logsErrorOnMissingTranslation = logsErrorOnMissingTranslation
         self.runningOnAGitHubAction = runningOnAGitHubAction
     }
 
@@ -33,7 +18,7 @@ public struct SwiftPolyglotCore {
 
         try searchDirectory(for: languageCodes, missingTranslations: &missingTranslations)
 
-        if missingTranslations, logErrorOnMissing {
+        if missingTranslations, logsErrorOnMissingTranslation {
             throw SwiftPolyglotError.missingTranslations
         } else if missingTranslations {
             print("Completed with missing translations.")
@@ -171,7 +156,7 @@ public struct SwiftPolyglotCore {
     
     private func logWarning(file: String, message: String) {
         if runningOnAGitHubAction {
-            if logErrorOnMissing {
+            if logsErrorOnMissingTranslation {
                 print("::error file=\(file)::\(message)")
             } else {
                 print("::warning file=\(file)::\(message)")
