@@ -1,6 +1,6 @@
 import Foundation
 
-public struct SwiftPolyglot {
+public struct SwiftPolyglotCore {
     private static let errorOnMissingArgument = "--errorOnMissing"
 
     private let arguments: [String]

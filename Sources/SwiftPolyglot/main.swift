@@ -9,7 +9,7 @@ else {
 }
 
 do {
-    let swiftPolyglot: SwiftPolyglot = try .init(
+    let swiftPolyglot: SwiftPolyglotCore = try .init(
         arguments: Array(CommandLine.arguments.dropFirst()),
         filePaths: filePaths,
         runningOnAGitHubAction: ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] == "true"
