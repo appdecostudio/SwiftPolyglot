@@ -14,13 +14,13 @@ final class SwiftPolyglotCoreTests: XCTestCase {
             return
         }
 
-        let swiftPolyglot: SwiftPolyglotCore = try .init(
+        let swiftPolyglotCore: SwiftPolyglotCore = try .init(
             arguments: ["ca,de,en,es"],
             filePaths: [stringCatalogFilePath],
             runningOnAGitHubAction: false
         )
 
-        XCTAssertNoThrow(try swiftPolyglot.run())
+        XCTAssertNoThrow(try swiftPolyglotCore.run())
     }
 
     func testStringCatalogVariationsFullyTranslated() throws {
@@ -35,13 +35,13 @@ final class SwiftPolyglotCoreTests: XCTestCase {
             return
         }
 
-        let swiftPolyglot: SwiftPolyglotCore = try .init(
+        let swiftPolyglotCore: SwiftPolyglotCore = try .init(
             arguments: ["ca,de,en,es"],
             filePaths: [stringCatalogFilePath],
             runningOnAGitHubAction: false
         )
 
-        XCTAssertNoThrow(try swiftPolyglot.run())
+        XCTAssertNoThrow(try swiftPolyglotCore.run())
     }
 
     func testStringCatalogWithMissingTranslations() throws {
@@ -56,13 +56,13 @@ final class SwiftPolyglotCoreTests: XCTestCase {
             return
         }
 
-        let swiftPolyglot: SwiftPolyglotCore = try .init(
+        let swiftPolyglotCore: SwiftPolyglotCore = try .init(
             arguments: ["ca,de,en,es", "--errorOnMissing"],
             filePaths: [stringCatalogFilePath],
             runningOnAGitHubAction: false
         )
 
-        XCTAssertThrowsError(try swiftPolyglot.run())
+        XCTAssertThrowsError(try swiftPolyglotCore.run())
     }
 
     func testStringCatalogWithMissingVariations() throws {
@@ -77,12 +77,12 @@ final class SwiftPolyglotCoreTests: XCTestCase {
             return
         }
 
-        let swiftPolyglot: SwiftPolyglotCore = try .init(
+        let swiftPolyglotCore: SwiftPolyglotCore = try .init(
             arguments: ["de,en", "--errorOnMissing"],
             filePaths: [stringCatalogFilePath],
             runningOnAGitHubAction: false
         )
 
-        XCTAssertThrowsError(try swiftPolyglot.run())
+        XCTAssertThrowsError(try swiftPolyglotCore.run())
     }
 }
