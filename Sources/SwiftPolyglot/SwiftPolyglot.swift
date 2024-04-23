@@ -4,6 +4,8 @@ import SwiftPolyglotCore
 
 @main
 struct SwiftPolyglot: ParsableCommand {
+    static let configuration: CommandConfiguration = .init(commandName: "swiftpolyglot")
+
     @Flag(help: "Log errors instead of warnings for missing translations.")
     private var errorOnMissing = false
 
