@@ -1,31 +1,21 @@
 import Foundation
 
-public struct SwiftPolyglot {
-    private static let errorOnMissingArgument = "--errorOnMissing"
-
-    private let arguments: [String]
+public struct SwiftPolyglotCore {
     private let filePaths: [String]
     private let languageCodes: [String]
-    private let runningOnAGitHubAction: Bool
+    private let logsErrorOnMissingTranslation: Bool
+    private let isRunningInAGitHubAction: Bool
 
-    private var logErrorOnMissing: Bool {
-        arguments.contains(Self.errorOnMissingArgument)
-    }
-
-    public init(arguments: [String], filePaths: [String], runningOnAGitHubAction: Bool) throws {
-        let languageCodes = arguments[0].split(separator: ",").map(String.init)
-
-        guard
-            !languageCodes.contains(Self.errorOnMissingArgument),
-            !languageCodes.isEmpty
-        else {
-            throw SwiftPolyglotError.noLanguageCodes
-        }
-
-        self.arguments = arguments
+    public init(
+        filePaths: [String],
+        languageCodes: [String],
+        logsErrorOnMissingTranslation: Bool,
+        isRunningInAGitHubAction: Bool
+    ) {
         self.filePaths = filePaths
         self.languageCodes = languageCodes
-        self.runningOnAGitHubAction = runningOnAGitHubAction
+        self.logsErrorOnMissingTranslation = logsErrorOnMissingTranslation
+        self.isRunningInAGitHubAction = isRunningInAGitHubAction
     }
 
     public func run() throws {
@@ -33,7 +23,7 @@ public struct SwiftPolyglot {
 
         try searchDirectory(for: languageCodes, missingTranslations: &missingTranslations)
 
-        if missingTranslations, logErrorOnMissing {
+        if missingTranslations, logsErrorOnMissingTranslation {
             throw SwiftPolyglotError.missingTranslations
         } else if missingTranslations {
             print("Completed with missing translations.")
@@ -90,7 +80,7 @@ public struct SwiftPolyglot {
               let jsonDict = jsonObject as? [String: Any],
               let strings = jsonDict["strings"] as? [String: [String: Any]]
         else {
-            if runningOnAGitHubAction {
+            if isRunningInAGitHubAction {
                 print("::warning file=\(fileURL.path)::Could not process file at path: \(fileURL.path)")
             } else {
                 print("Could not process file at path: \(fileURL.path)")
@@ -170,8 +160,8 @@ public struct SwiftPolyglot {
     }
     
     private func logWarning(file: String, message: String) {
-        if runningOnAGitHubAction {
-            if logErrorOnMissing {
+        if isRunningInAGitHubAction {
+            if logsErrorOnMissingTranslation {
                 print("::error file=\(file)::\(message)")
             } else {
                 print("::warning file=\(file)::\(message)")

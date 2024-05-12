@@ -14,13 +14,14 @@ final class SwiftPolyglotCoreTests: XCTestCase {
             return
         }
 
-        let swiftPolyglot: SwiftPolyglot = try .init(
-            arguments: ["ca,de,en,es"],
+        let swiftPolyglotCore: SwiftPolyglotCore = .init(
             filePaths: [stringCatalogFilePath],
-            runningOnAGitHubAction: false
+            languageCodes: ["ca", "de", "en", "es"],
+            logsErrorOnMissingTranslation: false,
+            isRunningInAGitHubAction: false
         )
 
-        XCTAssertNoThrow(try swiftPolyglot.run())
+        XCTAssertNoThrow(try swiftPolyglotCore.run())
     }
 
     func testStringCatalogVariationsFullyTranslated() throws {
@@ -35,13 +36,14 @@ final class SwiftPolyglotCoreTests: XCTestCase {
             return
         }
 
-        let swiftPolyglot: SwiftPolyglot = try .init(
-            arguments: ["ca,de,en,es"],
+        let swiftPolyglotCore: SwiftPolyglotCore = .init(
             filePaths: [stringCatalogFilePath],
-            runningOnAGitHubAction: false
+            languageCodes: ["ca", "de", "en", "es"],
+            logsErrorOnMissingTranslation: false,
+            isRunningInAGitHubAction: false
         )
 
-        XCTAssertNoThrow(try swiftPolyglot.run())
+        XCTAssertNoThrow(try swiftPolyglotCore.run())
     }
 
     func testStringCatalogWithMissingTranslations() throws {
@@ -56,13 +58,14 @@ final class SwiftPolyglotCoreTests: XCTestCase {
             return
         }
 
-        let swiftPolyglot: SwiftPolyglot = try .init(
-            arguments: ["ca,de,en,es", "--errorOnMissing"],
+        let swiftPolyglotCore: SwiftPolyglotCore = .init(
             filePaths: [stringCatalogFilePath],
-            runningOnAGitHubAction: false
+            languageCodes: ["ca", "de", "en", "es"],
+            logsErrorOnMissingTranslation: true,
+            isRunningInAGitHubAction: false
         )
 
-        XCTAssertThrowsError(try swiftPolyglot.run())
+        XCTAssertThrowsError(try swiftPolyglotCore.run())
     }
 
     func testStringCatalogWithMissingVariations() throws {
@@ -77,12 +80,13 @@ final class SwiftPolyglotCoreTests: XCTestCase {
             return
         }
 
-        let swiftPolyglot: SwiftPolyglot = try .init(
-            arguments: ["de,en", "--errorOnMissing"],
+        let swiftPolyglotCore: SwiftPolyglotCore = .init(
             filePaths: [stringCatalogFilePath],
-            runningOnAGitHubAction: false
+            languageCodes: ["de, en"],
+            logsErrorOnMissingTranslation: true,
+            isRunningInAGitHubAction: false
         )
 
-        XCTAssertThrowsError(try swiftPolyglot.run())
+        XCTAssertThrowsError(try swiftPolyglotCore.run())
     }
 }
