@@ -18,165 +18,196 @@ public struct SwiftPolyglotCore {
         self.isRunningInAGitHubAction = isRunningInAGitHubAction
     }
 
-    public func run() throws {
-        var missingTranslations = false
+    public func run() async throws {
+        let stringCatalogFileURLs: [URL] = getStringCatalogURLs(from: filePaths)
 
-        try searchDirectory(for: languageCodes, missingTranslations: &missingTranslations)
+        let missingTranslations: [MissingTranslation] = try await withThrowingTaskGroup(of: [MissingTranslation].self) { taskGroup in
+            for fileURL in stringCatalogFileURLs {
+                taskGroup.addTask {
+                    let strings: [String: [String: Any]] = extractStrings(
+                        from: fileURL,
+                        isRunningInAGitHubAction: isRunningInAGitHubAction
+                    )
 
-        if missingTranslations, logsErrorOnMissingTranslation {
+                    let missingTranslations: [MissingTranslation] = try await getMissingTranslations(from: strings, in: fileURL.path)
+
+                    let missingTranslationsLogs: [String] = missingTranslations.map { missingTranslation in
+                        if isRunningInAGitHubAction {
+                            return logForGitHubAction(
+                                missingTranslation: missingTranslation,
+                                logWithError: logsErrorOnMissingTranslation
+                            )
+                        } else {
+                            return missingTranslation.message
+                        }
+                    }
+
+                    missingTranslationsLogs.forEach { print($0) }
+
+                    return missingTranslations
+                }
+            }
+
+            return try await taskGroup.reduce(into: [MissingTranslation]()) { partialResult, missingTranslations in
+                partialResult.append(contentsOf: missingTranslations)
+            }
+        }
+
+        if !missingTranslations.isEmpty, logsErrorOnMissingTranslation {
             throw SwiftPolyglotError.missingTranslations
-        } else if missingTranslations {
+        } else if !missingTranslations.isEmpty {
             print("Completed with missing translations.")
         } else {
             print("All translations are present.")
         }
     }
 
-    private func checkDeviceVariations(
-        devices: [String: [String: Any]],
-        originalString: String,
-        lang: String,
-        fileURL: URL,
-        missingTranslations: inout Bool
-    ) {
-        for (device, value) in devices {
-            guard let stringUnit = value["stringUnit"] as? [String: Any],
-                  let state = stringUnit["state"] as? String, state == "translated"
-            else {
-                logWarning(
-                    file: fileURL.path,
-                    message: "'\(originalString)' device '\(device)' is missing or not translated in \(lang) in file: \(fileURL.path)"
-                )
-                missingTranslations = true
-                continue
-            }
-        }
-    }
-
-    private func checkPluralizations(
-        pluralizations: [String: [String: Any]],
-        originalString: String,
-        lang: String,
-        fileURL: URL,
-        missingTranslations: inout Bool
-    ) {
-        for (pluralForm, value) in pluralizations {
-            guard let stringUnit = value["stringUnit"] as? [String: Any],
-                  let state = stringUnit["state"] as? String, state == "translated"
-            else {
-                logWarning(
-                    file: fileURL.path,
-                    message: "'\(originalString)' plural form '\(pluralForm)' is missing or not translated in \(lang) in file: \(fileURL.path)"
-                )
-                missingTranslations = true
-                continue
-            }
-        }
-    }
-
-    private func checkTranslations(in fileURL: URL, for languages: [String], missingTranslations: inout Bool) throws {
-        guard let data = try? Data(contentsOf: fileURL),
-              let jsonObject = try? JSONSerialization.jsonObject(with: data),
-              let jsonDict = jsonObject as? [String: Any],
-              let strings = jsonDict["strings"] as? [String: [String: Any]]
+    private func extractStrings(from fileURL: URL, isRunningInAGitHubAction: Bool) -> [String: [String: Any]] {
+        guard
+            let data = try? Data(contentsOf: fileURL),
+            let jsonObject = try? JSONSerialization.jsonObject(with: data),
+            let jsonDict = jsonObject as? [String: Any],
+            let strings = jsonDict["strings"] as? [String: [String: Any]]
         else {
             if isRunningInAGitHubAction {
                 print("::warning file=\(fileURL.path)::Could not process file at path: \(fileURL.path)")
             } else {
                 print("Could not process file at path: \(fileURL.path)")
             }
-            return
+
+            return [:]
         }
+
+        return strings
+    }
+
+    private func getMissingTranslations(
+        from strings: [String: [String: Any]],
+        in filePath: String
+    ) async throws -> [MissingTranslation] {
+        var missingTranslations: [MissingTranslation] = []
 
         for (originalString, translations) in strings {
             guard let localizations = translations["localizations"] as? [String: [String: Any]] else {
-                logWarning(
-                    file: fileURL.path,
-                    message: "'\(originalString)' is not translated in any language in file: \(fileURL.path)"
+                missingTranslations.append(
+                    MissingTranslation(
+                        category: .missingTranslationForAllLanguages,
+                        filePath: filePath,
+                        originalString: originalString
+                    )
                 )
-                missingTranslations = true
+
                 continue
             }
 
-            for lang in languages {
+            for lang in languageCodes {
                 guard let languageDict = localizations[lang] else {
-                    logWarning(
-                        file: fileURL.path,
-                        message: "'\(originalString)' is missing translations for language: \(lang) in file: \(fileURL.path)"
+                    missingTranslations.append(
+                        MissingTranslation(
+                            category: .missingTranslation(forLanguage: lang),
+                            filePath: filePath,
+                            originalString: originalString
+                        )
                     )
-                    missingTranslations = true
+
                     continue
                 }
 
                 if let variations = languageDict["variations"] as? [String: [String: [String: Any]]] {
-                    try checkVariations(
-                        variations: variations,
-                        originalString: originalString,
-                        lang: lang,
-                        fileURL: fileURL,
-                        missingTranslations: &missingTranslations
+                    missingTranslations.append(
+                        contentsOf:
+                            try getMissingTranslationsFromVariations(
+                                variations,
+                                originalString: originalString,
+                                lang: lang,
+                                filePath: filePath
+                            )
                     )
-                } else if let stringUnit = languageDict["stringUnit"] as? [String: Any],
-                          let state = stringUnit["state"] as? String, state != "translated"
+                } else if
+                    let stringUnit = languageDict["stringUnit"] as? [String: Any],
+                    let state = stringUnit["state"] as? String,
+                    state != "translated"
                 {
-                    logWarning(
-                        file: fileURL.path,
-                        message: "'\(originalString)' is missing or not translated in \(lang) in file: \(fileURL.path)"
+                    missingTranslations.append(
+                        MissingTranslation(
+                            category: .missingOrNotTranslated(inLanguage: lang),
+                            filePath: filePath,
+                            originalString: originalString
+                        )
                     )
-                    missingTranslations = true
                 }
             }
         }
+
+        return missingTranslations
     }
 
-    private func checkVariations(
-        variations: [String: [String: [String: Any]]],
+    private func getMissingTranslationsFromVariations(
+        _ variations: [String: [String: [String: Any]]],
         originalString: String,
         lang: String,
-        fileURL: URL,
-        missingTranslations: inout Bool
-    ) throws {
+        filePath: String
+    ) throws -> [MissingTranslation] {
+        var missingTranslations: [MissingTranslation] = []
+
         for (variationKey, variationDict) in variations {
             if variationKey == "plural" {
-                checkPluralizations(
-                    pluralizations: variationDict,
-                    originalString: originalString,
-                    lang: lang,
-                    fileURL: fileURL,
-                    missingTranslations: &missingTranslations
-                )
+                for (pluralForm, value) in variationDict {
+                    guard 
+                        let stringUnit = value["stringUnit"] as? [String: Any],
+                        let state = stringUnit["state"] as? String,
+                        state == "translated"
+                    else {
+                        missingTranslations.append(
+                            MissingTranslation(
+                                category: .pluralMissingOrNotTranslated(forPluralForm: pluralForm, inLanguage: lang),
+                                filePath: filePath,
+                                originalString: originalString
+                            )
+                        )
+
+                        continue
+                    }
+                }
             } else if variationKey == "device" {
-                checkDeviceVariations(
-                    devices: variationDict,
-                    originalString: originalString,
-                    lang: lang,
-                    fileURL: fileURL,
-                    missingTranslations: &missingTranslations
-                )
+                for (device, value) in variationDict {
+                    guard 
+                        let stringUnit = value["stringUnit"] as? [String: Any],
+                        let state = stringUnit["state"] as? String,
+                        state == "translated"
+                    else {
+                        missingTranslations.append(
+                            MissingTranslation(
+                                category: .deviceMissingOrNotTranslated(forDevice: device, inLanguage: lang),
+                                filePath: filePath,
+                                originalString: originalString
+                            )
+                        )
+
+                        continue
+                    }
+                }
             } else {
                 throw SwiftPolyglotError.unsupportedVariation(variation: variationKey)
             }
         }
+
+        return missingTranslations
     }
-    
-    private func logWarning(file: String, message: String) {
-        if isRunningInAGitHubAction {
-            if logsErrorOnMissingTranslation {
-                print("::error file=\(file)::\(message)")
-            } else {
-                print("::warning file=\(file)::\(message)")
-            }
-        } else {
-            print(message)
+
+    private func getStringCatalogURLs(from filePaths: [String]) -> [URL] {
+        filePaths.compactMap { filePath in
+            guard filePath.hasSuffix(".xcstrings") else { return nil }
+
+            return URL(fileURLWithPath: filePath)
         }
     }
 
-    private func searchDirectory(for languages: [String], missingTranslations: inout Bool) throws {
-        for filePath in filePaths {
-            if filePath.hasSuffix(".xcstrings") {
-                let fileURL = URL(fileURLWithPath: filePath)
-                try checkTranslations(in: fileURL, for: languages, missingTranslations: &missingTranslations)
-            }
+    private func logForGitHubAction(missingTranslation: MissingTranslation, logWithError: Bool) -> String {
+        if logWithError {
+            return "::error file=\(missingTranslation.filePath)::\(missingTranslation.message)"
+        } else {
+            return "::warning file=\(missingTranslation.filePath)::\(missingTranslation.message)"
         }
     }
 }

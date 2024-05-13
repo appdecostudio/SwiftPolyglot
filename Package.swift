@@ -5,6 +5,9 @@ import PackageDescription
 
 let package = Package(
     name: "SwiftPolyglot",
+    platforms: [
+        .macOS(.v10_15)
+    ],
     products: [
         .executable(name: "swiftpolyglot", targets: ["SwiftPolyglot"]),
     ],
