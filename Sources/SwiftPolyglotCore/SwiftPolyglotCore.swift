@@ -114,14 +114,14 @@ public struct SwiftPolyglotCore {
                 }
 
                 if let variations = languageDict["variations"] as? [String: [String: [String: Any]]] {
-                    missingTranslations.append(
+                    try missingTranslations.append(
                         contentsOf:
-                            try getMissingTranslationsFromVariations(
-                                variations,
-                                originalString: originalString,
-                                lang: lang,
-                                filePath: filePath
-                            )
+                        getMissingTranslationsFromVariations(
+                            variations,
+                            originalString: originalString,
+                            lang: lang,
+                            filePath: filePath
+                        )
                     )
                 } else if
                     let stringUnit = languageDict["stringUnit"] as? [String: Any],
