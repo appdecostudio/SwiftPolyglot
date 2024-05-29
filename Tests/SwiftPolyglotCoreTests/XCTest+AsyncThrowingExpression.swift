@@ -16,8 +16,8 @@ import XCTest
 ///   - message: An optional description of a failure.
 ///   - file: The file where the failure occurs. The default is the file path of the test case where this function is being called.
 ///   - line: The line number where the failure occurs. The default is the line number where this function is being called.
-public func XCTAssertNoThrowAsync<T>(
-    _ expression: @autoclosure () async throws -> T,
+public func XCTAssertNoThrowAsync(
+    _ expression: @autoclosure () async throws -> some Any,
     _ message: @autoclosure () -> String = "",
     file: StaticString = #filePath,
     line: UInt = #line
@@ -54,8 +54,8 @@ public func XCTAssertNoThrowAsync<T>(
 ///   - errorHandler: An optional handler for errors that `expression` throws.
 ///
 /// from: https://gitlab.com/-/snippets/2567566
-public func XCTAssertThrowsErrorAsync<T>(
-    _ expression: @autoclosure () async throws -> T,
+public func XCTAssertThrowsErrorAsync(
+    _ expression: @autoclosure () async throws -> some Any,
     _ message: @autoclosure () -> String = "",
     file: StaticString = #filePath,
     line: UInt = #line,
