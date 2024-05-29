@@ -153,7 +153,7 @@ public struct SwiftPolyglotCore {
         for (variationKey, variationDict) in variations {
             if variationKey == "plural" {
                 for (pluralForm, value) in variationDict {
-                    guard 
+                    guard
                         let stringUnit = value["stringUnit"] as? [String: Any],
                         let state = stringUnit["state"] as? String,
                         state == "translated"
@@ -171,7 +171,7 @@ public struct SwiftPolyglotCore {
                 }
             } else if variationKey == "device" {
                 for (device, value) in variationDict {
-                    guard 
+                    guard
                         let stringUnit = value["stringUnit"] as? [String: Any],
                         let state = stringUnit["state"] as? String,
                         state == "translated"
