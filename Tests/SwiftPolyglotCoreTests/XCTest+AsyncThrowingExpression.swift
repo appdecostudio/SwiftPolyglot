@@ -74,4 +74,3 @@ public func XCTAssertThrowsErrorAsync(
         errorHandler(error)
     }
 }
-
