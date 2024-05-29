@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "SwiftPolyglot",
     platforms: [
-        .macOS(.v10_15)
+        .macOS(.v10_15),
     ],
     products: [
         .executable(name: "swiftpolyglot", targets: ["SwiftPolyglot"]),
@@ -19,7 +19,7 @@ let package = Package(
             name: "SwiftPolyglot",
             dependencies: [
                 "SwiftPolyglotCore",
-                .product(name: "ArgumentParser", package: "swift-argument-parser")
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ]
         ),
         .target(name: "SwiftPolyglotCore"),

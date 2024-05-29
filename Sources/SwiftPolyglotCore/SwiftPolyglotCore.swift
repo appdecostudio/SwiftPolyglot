@@ -114,14 +114,14 @@ public struct SwiftPolyglotCore {
                 }
 
                 if let variations = languageDict["variations"] as? [String: [String: [String: Any]]] {
-                    missingTranslations.append(
+                    try missingTranslations.append(
                         contentsOf:
-                            try getMissingTranslationsFromVariations(
-                                variations,
-                                originalString: originalString,
-                                lang: lang,
-                                filePath: filePath
-                            )
+                        getMissingTranslationsFromVariations(
+                            variations,
+                            originalString: originalString,
+                            lang: lang,
+                            filePath: filePath
+                        )
                     )
                 } else if
                     let stringUnit = languageDict["stringUnit"] as? [String: Any],
@@ -153,7 +153,7 @@ public struct SwiftPolyglotCore {
         for (variationKey, variationDict) in variations {
             if variationKey == "plural" {
                 for (pluralForm, value) in variationDict {
-                    guard 
+                    guard
                         let stringUnit = value["stringUnit"] as? [String: Any],
                         let state = stringUnit["state"] as? String,
                         state == "translated"
@@ -171,7 +171,7 @@ public struct SwiftPolyglotCore {
                 }
             } else if variationKey == "device" {
                 for (device, value) in variationDict {
-                    guard 
+                    guard
                         let stringUnit = value["stringUnit"] as? [String: Any],
                         let state = stringUnit["state"] as? String,
                         state == "translated"

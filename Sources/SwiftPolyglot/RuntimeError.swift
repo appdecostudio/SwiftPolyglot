@@ -6,10 +6,10 @@ enum RuntimeError: Error {
 extension RuntimeError: CustomStringConvertible {
     var description: String {
         switch self {
-        case let .coreError(description):
-            return description
-        case .fileListingNotPossible:
-            return "It was not possible to list all files to be checked"
+            case let .coreError(description):
+                return description
+            case .fileListingNotPossible:
+                return "It was not possible to list all files to be checked"
         }
     }
 }
