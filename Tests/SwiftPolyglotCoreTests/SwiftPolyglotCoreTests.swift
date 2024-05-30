@@ -21,7 +21,7 @@ final class SwiftPolyglotCoreTests: XCTestCase {
             isRunningInAGitHubAction: false
         )
 
-        await XCTAssertNoThrowAsync(try await swiftPolyglotCore.run())
+        await XCTAssertNoThrowAsync(swiftPolyglotCore.run)
     }
 
     func testStringCatalogVariationsFullyTranslated() async throws {
@@ -43,7 +43,7 @@ final class SwiftPolyglotCoreTests: XCTestCase {
             isRunningInAGitHubAction: false
         )
 
-        await XCTAssertNoThrowAsync(try await swiftPolyglotCore.run())
+        await XCTAssertNoThrowAsync(swiftPolyglotCore.run)
     }
 
     func testStringCatalogWithMissingTranslations() async throws {

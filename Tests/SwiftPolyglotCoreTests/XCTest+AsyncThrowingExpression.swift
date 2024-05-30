@@ -5,33 +5,23 @@ import XCTest
 ///
 /// Example usage:
 ///
-///     await assertNoThrowAsync(
-///         try await sut.function()
-///     ) { error in
-///         XCTAssertEqual(error as? MyError, MyError.specificError)
-///     }
+///     await assertNoThrowAsync(sut.function)
 ///
 /// - Parameters:
 ///   - expression: An asynchronous expression that can throw an error.
-///   - message: An optional description of a failure.
+///   - failureMessage: An optional description of a failure.
 ///   - file: The file where the failure occurs. The default is the file path of the test case where this function is being called.
 ///   - line: The line number where the failure occurs. The default is the line number where this function is being called.
 public func XCTAssertNoThrowAsync(
-    _ expression: @autoclosure () async throws -> some Any,
-    _ message: @autoclosure () -> String = "",
+    _ expression: () async throws -> some Any,
+    failureMessage: String = "Asynchronous call did throw an error.",
     file: StaticString = #filePath,
     line: UInt = #line
 ) async {
     do {
         _ = try await expression()
     } catch {
-        // expected no error to be thrown, but it was
-        let customMessage = message()
-        if customMessage.isEmpty {
-            XCTFail("Asynchronous call did throw an error.", file: file, line: line)
-        } else {
-            XCTFail(customMessage, file: file, line: line)
-        }
+        XCTFail(failureMessage, file: file, line: line)
     }
 }
 
