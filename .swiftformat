@@ -11,4 +11,5 @@
 
 # rules
 
---disable preferForLoop,hoistAwait
+--disable preferForLoop
+
