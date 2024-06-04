@@ -5,6 +5,8 @@ enum SwiftPolyglotError: Error {
     case unsupportedVariation(variation: String)
 }
 
+extension SwiftPolyglotError: Equatable {}
+
 extension SwiftPolyglotError: LocalizedError {
     public var errorDescription: String? {
         switch self {
