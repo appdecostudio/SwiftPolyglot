@@ -5,13 +5,22 @@ import PackageDescription
 
 let package = Package(
     name: "SwiftPolyglot",
+    platforms: [
+        .macOS(.v10_15),
+    ],
     products: [
         .executable(name: "swiftpolyglot", targets: ["SwiftPolyglot"]),
+    ],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMajor(from: "1.3.1")),
     ],
     targets: [
         .executableTarget(
             name: "SwiftPolyglot",
-            dependencies: ["SwiftPolyglotCore"]
+            dependencies: [
+                "SwiftPolyglotCore",
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+            ]
         ),
         .target(name: "SwiftPolyglotCore"),
         .testTarget(

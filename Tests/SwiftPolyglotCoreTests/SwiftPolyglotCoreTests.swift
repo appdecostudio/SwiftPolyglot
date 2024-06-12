@@ -2,7 +2,7 @@
 import XCTest
 
 final class SwiftPolyglotCoreTests: XCTestCase {
-    func testStringCatalogFullyTranslated() throws {
+    func testStringCatalogFullyTranslated() async throws {
         guard
             let stringCatalogFilePath = Bundle.module.path(
                 forResource: "FullyTranslated",
@@ -14,16 +14,17 @@ final class SwiftPolyglotCoreTests: XCTestCase {
             return
         }
 
-        let swiftPolyglot: SwiftPolyglot = try .init(
-            arguments: ["ca,de,en,es"],
+        let swiftPolyglotCore: SwiftPolyglotCore = .init(
             filePaths: [stringCatalogFilePath],
-            runningOnAGitHubAction: false
+            languageCodes: ["ca", "de", "en", "es"],
+            logsErrorOnMissingTranslation: false,
+            isRunningInAGitHubAction: false
         )
 
-        XCTAssertNoThrow(try swiftPolyglot.run())
+        await XCTAssertNoThrowAsync(swiftPolyglotCore.run)
     }
 
-    func testStringCatalogVariationsFullyTranslated() throws {
+    func testStringCatalogVariationsFullyTranslated() async throws {
         guard
             let stringCatalogFilePath = Bundle.module.path(
                 forResource: "VariationsFullyTranslated",
@@ -35,16 +36,17 @@ final class SwiftPolyglotCoreTests: XCTestCase {
             return
         }
 
-        let swiftPolyglot: SwiftPolyglot = try .init(
-            arguments: ["ca,de,en,es"],
+        let swiftPolyglotCore: SwiftPolyglotCore = .init(
             filePaths: [stringCatalogFilePath],
-            runningOnAGitHubAction: false
+            languageCodes: ["ca", "de", "en", "es"],
+            logsErrorOnMissingTranslation: false,
+            isRunningInAGitHubAction: false
         )
 
-        XCTAssertNoThrow(try swiftPolyglot.run())
+        await XCTAssertNoThrowAsync(swiftPolyglotCore.run)
     }
 
-    func testStringCatalogWithMissingTranslations() throws {
+    func testStringCatalogWithMissingTranslations() async throws {
         guard
             let stringCatalogFilePath = Bundle.module.path(
                 forResource: "WithMissingTranslations",
@@ -56,16 +58,17 @@ final class SwiftPolyglotCoreTests: XCTestCase {
             return
         }
 
-        let swiftPolyglot: SwiftPolyglot = try .init(
-            arguments: ["ca,de,en,es", "--errorOnMissing"],
+        let swiftPolyglotCore: SwiftPolyglotCore = .init(
             filePaths: [stringCatalogFilePath],
-            runningOnAGitHubAction: false
+            languageCodes: ["ca", "de", "en", "es"],
+            logsErrorOnMissingTranslation: true,
+            isRunningInAGitHubAction: false
         )
 
-        XCTAssertThrowsError(try swiftPolyglot.run())
+        await XCTAssertThrowsErrorAsync(swiftPolyglotCore.run, SwiftPolyglotError.missingTranslations)
     }
 
-    func testStringCatalogWithMissingVariations() throws {
+    func testStringCatalogWithMissingVariations() async throws {
         guard
             let stringCatalogFilePath = Bundle.module.path(
                 forResource: "VariationsWithMissingTranslations",
@@ -77,12 +80,13 @@ final class SwiftPolyglotCoreTests: XCTestCase {
             return
         }
 
-        let swiftPolyglot: SwiftPolyglot = try .init(
-            arguments: ["de,en", "--errorOnMissing"],
+        let swiftPolyglotCore: SwiftPolyglotCore = .init(
             filePaths: [stringCatalogFilePath],
-            runningOnAGitHubAction: false
+            languageCodes: ["de, en"],
+            logsErrorOnMissingTranslation: true,
+            isRunningInAGitHubAction: false
         )
 
-        XCTAssertThrowsError(try swiftPolyglot.run())
+        await XCTAssertThrowsErrorAsync(swiftPolyglotCore.run, SwiftPolyglotError.missingTranslations)
     }
 }

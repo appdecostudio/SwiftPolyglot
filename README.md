@@ -26,14 +26,14 @@ $ swift build -c release
 
 ```
 $ cd ../path/to/your/project
-$ swift run --package-path ../path/to/SwiftPolyglot swiftpolyglot "en,es,de"
+$ swift run --package-path ../path/to/SwiftPolyglot swiftpolyglot en es de
 ```
 
 ## Arguments
 
-You must specify at least one language code, they must be within quotation marks, and they must be separated by commas. If you are not providing a translation for your language of origin, you do not need to specify that language. Otherwise, you will get errors due to missing translations.
+You must specify at least one language code, and they must be separated by spaces. If you are not providing a translation for your language of origin, you do not need to specify that language. Otherwise, you will get errors due to missing translations.
 
-By default, SwiftPolyglot will not throw an error at the end of the script if there are translations missing. However, you can enable error throwing by adding the argument `--errorOnMissing`
+By default, SwiftPolyglot will not throw an error at the end of the script if there are translations missing. However, you can enable error throwing by adding the flag `--error-on-missing`
 
 ## Integrating with GitHub Actions
 
@@ -60,6 +60,6 @@ jobs:
       - name: validate translations
         run: |
           swift build --package-path ../SwiftPolyglot --configuration release
-          swift run --package-path ../SwiftPolyglot swiftpolyglot "es,fr,de,it" --errorOnMissing
+          swift run --package-path ../SwiftPolyglot swiftpolyglot es fr de it --error-on-missing
 ```
 
