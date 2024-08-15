@@ -88,6 +88,10 @@ public struct SwiftPolyglotCore {
         var missingTranslations: [MissingTranslation] = []
 
         for (originalString, translations) in strings {
+            if let shouldTranslate = translations["shouldTranslate"] as? Bool, shouldTranslate == false {
+                continue
+            }
+
             guard let localizations = translations["localizations"] as? [String: [String: Any]] else {
                 missingTranslations.append(
                     MissingTranslation(
