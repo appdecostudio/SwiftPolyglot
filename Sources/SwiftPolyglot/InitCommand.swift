@@ -19,12 +19,7 @@ struct InitCommand: ParsableCommand {
             throw RuntimeError.configFileAlreadyExists
         }
 
-        guard
-            let enumerator = FileManager.default.enumerator(atPath: FileManager.default.currentDirectoryPath),
-            let filePaths = enumerator.allObjects as? [String]
-        else {
-            throw RuntimeError.fileListingNotPossible
-        }
+        let filePaths = try FileEnumeration.enumerateFiles()
 
         let absolutePaths = filePaths.map { filePath in
             URL(fileURLWithPath: filePath, relativeTo: URL(fileURLWithPath: FileManager.default.currentDirectoryPath)).path

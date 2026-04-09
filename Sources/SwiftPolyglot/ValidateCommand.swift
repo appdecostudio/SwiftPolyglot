@@ -27,12 +27,7 @@ struct ValidateCommand: AsyncParsableCommand {
             throw RuntimeError.noLanguagesSpecified
         }
 
-        guard
-            let enumerator = FileManager.default.enumerator(atPath: FileManager.default.currentDirectoryPath),
-            let filePaths = enumerator.allObjects as? [String]
-        else {
-            throw RuntimeError.fileListingNotPossible
-        }
+        let filePaths = try FileEnumeration.enumerateFiles()
 
         let swiftPolyglotCore: SwiftPolyglotCore = .init(
             filePaths: filePaths,
