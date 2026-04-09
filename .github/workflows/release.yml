@@ -23,6 +23,7 @@ jobs:
         run: |
           VERSION=${GITHUB_REF_NAME#v}
           sed -i '' "s/version: \".*\"/version: \"${VERSION}\"/" Sources/SwiftPolyglot/SwiftPolyglot.swift
+          sed -i '' "s/--branch=v[0-9]*\.[0-9]*\.[0-9]*/--branch=v${VERSION}/" README.md
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Build universal binary
@@ -46,6 +47,14 @@ jobs:
             swiftpolyglot-*-macos.tar.gz.sha256
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit version updates to main
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add Sources/SwiftPolyglot/SwiftPolyglot.swift README.md
+          git commit -m "Update version references to ${VERSION}" || true
+          git push origin HEAD:main
 
       - name: Update Homebrew tap
         env:
