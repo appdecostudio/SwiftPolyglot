@@ -36,9 +36,9 @@ public enum SwiftPolyglotConfigError: LocalizedError {
     public var errorDescription: String? {
         switch self {
             case .emptyLanguages:
-                return "The \(SwiftPolyglotConfig.fileName) file must contain at least one language in the \"languages\" array."
+                "The \(SwiftPolyglotConfig.fileName) file must contain at least one language in the \"languages\" array."
             case .configFileNotFound:
-                return "No \(SwiftPolyglotConfig.fileName) file found in the current directory."
+                "No \(SwiftPolyglotConfig.fileName) file found in the current directory."
         }
     }
 }
