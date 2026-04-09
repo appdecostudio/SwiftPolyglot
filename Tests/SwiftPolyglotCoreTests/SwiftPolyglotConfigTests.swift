@@ -73,6 +73,46 @@ struct SwiftPolyglotConfigTests {
         }
     }
 
+    @Test func `detect translated languages from xcstrings files`() throws {
+        let fullyTranslatedPath = try #require(
+            Bundle.module.path(
+                forResource: "FullyTranslated",
+                ofType: ".xcstrings",
+                inDirectory: "TestFiles"
+            )
+        )
+
+        let languages = SwiftPolyglotConfig.detectTranslatedLanguages(in: [fullyTranslatedPath])
+
+        #expect(languages.contains("ca"))
+        #expect(languages.contains("de"))
+        #expect(languages.contains("en"))
+        #expect(languages.contains("es"))
+    }
+
+    @Test func `detect translated languages excludes untranslated languages`() throws {
+        let missingTranslationsPath = try #require(
+            Bundle.module.path(
+                forResource: "WithMissingTranslations",
+                ofType: ".xcstrings",
+                inDirectory: "TestFiles"
+            )
+        )
+
+        let languages = SwiftPolyglotConfig.detectTranslatedLanguages(in: [missingTranslationsPath])
+
+        #expect(languages.contains("de"))
+        #expect(languages.contains("en"))
+        #expect(languages.contains("ca") == false, "ca should be excluded — no strings are translated in ca")
+        #expect(languages.contains("es") == false, "es should be excluded — no strings are translated in es")
+    }
+
+    @Test func `detect translated languages returns empty for no xcstrings files`() {
+        let languages = SwiftPolyglotConfig.detectTranslatedLanguages(in: ["/nonexistent/path.xcstrings"])
+
+        #expect(languages.isEmpty)
+    }
+
     @Test func `load throws on empty languages`() throws {
         let tempDir = try createTempDirectory()
         defer { try? FileManager.default.removeItem(at: tempDir) }
