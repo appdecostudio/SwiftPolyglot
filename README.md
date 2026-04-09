@@ -10,11 +10,20 @@ SwiftPolyglot will ensure that:
 
 ## Installation
 
-Right now, SwiftPolyglot can only be used from the command line. This gives you the flexibility to run it manually or integrate it with another toolchain.
+### Homebrew
 
-To do this, you'll need to follow these steps:
+```
+$ brew tap appdecostudio/swiftpolyglot
+$ brew install swiftpolyglot
+```
 
-1. Clone the repository and build the package locally:
+### Mint
+
+```
+$ mint install appdecostudio/SwiftPolyglot
+```
+
+### Build from Source
 
 ```
 $ git clone https://github.com/appdecostudio/SwiftPolyglot
@@ -22,24 +31,95 @@ $ cd SwiftPolyglot
 $ swift build -c release
 ```
 
-2. Run against your project:
+## Usage
+
+### With a Configuration File (Recommended)
+
+Run `swiftpolyglot init` in your project directory to generate a `.swiftpolyglot.json` configuration file. This will automatically detect the languages used in your existing `.xcstrings` files:
 
 ```
-$ cd ../path/to/your/project
-$ swift run --package-path ../path/to/SwiftPolyglot swiftpolyglot en es de
+$ cd /path/to/your/project
+$ swiftpolyglot init
+Detected languages: de, en, es, fr
+Created .swiftpolyglot.json
 ```
 
-## Arguments
+The generated `.swiftpolyglot.json` file looks like this:
 
-You must specify at least one language code, and they must be separated by spaces. If you are not providing a translation for your language of origin, you do not need to specify that language. Otherwise, you will get errors due to missing translations.
+```json
+{
+  "errorOnMissing" : false,
+  "languages" : [
+    "de",
+    "en",
+    "es",
+    "fr"
+  ]
+}
+```
 
-By default, SwiftPolyglot will not throw an error at the end of the script if there are translations missing. However, you can enable error throwing by adding the flag `--error-on-missing`
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `languages` | `[String]` | Yes | Language codes to validate |
+| `errorOnMissing` | `Bool` | No | Whether to exit with an error when translations are missing (default: `false`) |
+
+Once you have a configuration file, simply run:
+
+```
+$ swiftpolyglot
+```
+
+### With CLI Arguments
+
+You can also pass language codes directly as arguments:
+
+```
+$ swiftpolyglot en es de
+```
+
+CLI arguments take precedence over the configuration file. Use `--ignore-config` to skip the configuration file entirely:
+
+```
+$ swiftpolyglot --ignore-config en es
+```
+
+### Arguments
+
+You must specify at least one language code (via arguments or config file), and they must be separated by spaces. If you are not providing a translation for your language of origin, you do not need to specify that language. Otherwise, you will get errors due to missing translations.
+
+By default, SwiftPolyglot will not throw an error at the end of the script if there are translations missing. However, you can enable error throwing by adding the flag `--error-on-missing` or setting `"errorOnMissing": true` in your configuration file.
 
 ## Integrating with GitHub Actions
 
-Here is a sample GitHub action .yml file that you can use to automatically run SwiftPolyglot. Feel free to modify this for your needs.
+### Using Homebrew
 
+```yaml
+name: Run SwiftPolyglot
+
+on:
+  pull_request:
+    types: [synchronize, opened, reopened, labeled, unlabeled, edited]
+
+jobs:
+  main:
+    name: Validate Translations
+    runs-on: macOS-latest
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v3
+
+      - name: Install SwiftPolyglot
+        run: |
+          brew tap appdecostudio/swiftpolyglot
+          brew install swiftpolyglot
+
+      - name: Validate translations
+        run: swiftpolyglot --error-on-missing
 ```
+
+### Building from Source
+
+```yaml
 name: Run SwiftPolyglot
 
 on:
@@ -55,11 +135,10 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Clone SwiftPolyglot
-        run: git clone https://github.com/appdecostudio/SwiftPolyglot.git --branch=0.3.1 ../SwiftPolyglot
+        run: git clone https://github.com/appdecostudio/SwiftPolyglot.git --branch=v2.0.0 ../SwiftPolyglot
 
-      - name: validate translations
+      - name: Validate translations
         run: |
           swift build --package-path ../SwiftPolyglot --configuration release
           swift run --package-path ../SwiftPolyglot swiftpolyglot es fr de it --error-on-missing
 ```
-

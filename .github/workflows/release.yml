@@ -1,0 +1,86 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build & Release
+    runs-on: macOS-15
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v3
+
+      - name: Select Xcode 26
+        run: sudo xcode-select -s /Applications/Xcode_26.0.app
+
+      - name: Set version from tag
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          sed -i '' "s/version: \".*\"/version: \"${VERSION}\"/" Sources/SwiftPolyglot/SwiftPolyglot.swift
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+      - name: Build universal binary
+        run: swift build -c release --arch arm64 --arch x86_64
+
+      - name: Package binary
+        run: |
+          mkdir -p staging
+          cp .build/apple/Products/Release/swiftpolyglot staging/
+          cd staging
+          tar -czf ../swiftpolyglot-${VERSION}-macos.tar.gz swiftpolyglot
+          cd ..
+          shasum -a 256 swiftpolyglot-${VERSION}-macos.tar.gz > swiftpolyglot-${VERSION}-macos.tar.gz.sha256
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            swiftpolyglot-*-macos.tar.gz
+            swiftpolyglot-*-macos.tar.gz.sha256
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Homebrew tap
+        if: ${{ secrets.HOMEBREW_TAP_TOKEN != '' }}
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          SHA256=$(cat swiftpolyglot-${VERSION}-macos.tar.gz.sha256 | awk '{print $1}')
+
+          git clone https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/appdecostudio/homebrew-swiftpolyglot.git /tmp/homebrew-tap
+
+          cat > /tmp/homebrew-tap/Formula/swiftpolyglot.rb << EOF
+          class Swiftpolyglot < Formula
+            desc "Validate .xcstrings translation files for completeness"
+            homepage "https://github.com/appdecostudio/SwiftPolyglot"
+            license "MIT"
+            version "${VERSION}"
+
+            url "https://github.com/appdecostudio/SwiftPolyglot/releases/download/v#{version}/swiftpolyglot-#{version}-macos.tar.gz"
+            sha256 "${SHA256}"
+
+            depends_on :macos
+
+            def install
+              bin.install "swiftpolyglot"
+            end
+
+            test do
+              assert_match version.to_s, shell_output("#{bin}/swiftpolyglot --version")
+            end
+          end
+          EOF
+
+          cd /tmp/homebrew-tap
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add Formula/swiftpolyglot.rb
+          git commit -m "Update swiftpolyglot to ${VERSION}"
+          git push
