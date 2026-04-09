@@ -5,7 +5,7 @@
 --commas always
 --indent 4
 --indentcase true
---swiftversion 5.7
+--swiftversion 6.0
 --trimwhitespace always
 --ifdef no-indent
 

@@ -1,6 +1,6 @@
 import Foundation
 
-public struct SwiftPolyglotCore {
+public struct SwiftPolyglotCore: Sendable {
     private let filePaths: [String]
     private let languageCodes: [String]
     private let logsErrorOnMissingTranslation: Bool
@@ -33,12 +33,12 @@ public struct SwiftPolyglotCore {
 
                     let missingTranslationsLogs: [String] = missingTranslations.map { missingTranslation in
                         if isRunningInAGitHubAction {
-                            return logForGitHubAction(
+                            logForGitHubAction(
                                 missingTranslation: missingTranslation,
                                 logWithError: logsErrorOnMissingTranslation
                             )
                         } else {
-                            return missingTranslation.message
+                            missingTranslation.message
                         }
                     }
 
@@ -209,9 +209,9 @@ public struct SwiftPolyglotCore {
 
     private func logForGitHubAction(missingTranslation: MissingTranslation, logWithError: Bool) -> String {
         if logWithError {
-            return "::error file=\(missingTranslation.filePath)::\(missingTranslation.message)"
+            "::error file=\(missingTranslation.filePath)::\(missingTranslation.message)"
         } else {
-            return "::warning file=\(missingTranslation.filePath)::\(missingTranslation.message)"
+            "::warning file=\(missingTranslation.filePath)::\(missingTranslation.message)"
         }
     }
 }
