@@ -135,7 +135,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Clone SwiftPolyglot
-        run: git clone https://github.com/appdecostudio/SwiftPolyglot.git --branch=v2.0.0 ../SwiftPolyglot
+        run: git clone https://github.com/appdecostudio/SwiftPolyglot.git --branch=v2.0.2 ../SwiftPolyglot
 
       - name: Validate translations
         run: |
